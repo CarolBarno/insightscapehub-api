@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  insightscape:
+    container_name: insight_scape
+    image: insightscape
+    command: >
+      bash -c "uvicorn app.main:app --reload --host 0.0.0.0 --port $PORT"
+    
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "$PORT:$PORT"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/venv
