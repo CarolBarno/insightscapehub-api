@@ -25,3 +25,10 @@ def stringify(perm: Union['Enum', str]) -> str:
         return perm
 
     return getattr(perm, 'value', perm)
+
+
+class Status(Enum):
+    PENDING = "PENDING"
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    DELETED = "DELETED"
