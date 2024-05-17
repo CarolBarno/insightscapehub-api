@@ -2,6 +2,7 @@ import uuid
 from insightscapehub.utils.db import Base
 from sqlalchemy import UUID, Column, String
 from insightscapehub.utils.enums import Status
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
@@ -12,6 +13,9 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     _password = Column(String(100), nullable=True)
     status = Column(String, default=Status.PENDING.value, nullable=False)
+
+    verification_tokens = relationship(
+        'VerificationToken', back_populates='user')
 
     @property
     def password(self):

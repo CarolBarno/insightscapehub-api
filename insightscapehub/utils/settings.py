@@ -8,6 +8,7 @@ load_dotenv()
 
 # SECURITY
 DEBUG = os.environ.get("DEBUG", False)
+IS_TESTING = os.environ.get("IS_TESTING", False)
 
 # DATABASE CONFIGS
 DB_USER = os.environ.get("DB_USER", "postgres")
@@ -31,3 +32,12 @@ if not APP_HOME:
 REQUEST_LIMIT = os.environ.get('REQUEST_LIMIT', 100)
 REQUEST_INTERVAL = os.environ.get('REQUEST_INTERVAL', 60)
 APP_PORT = os.environ.get('PORT', 5501)
+
+# MAIL CONFIGURATIONS
+EMAIL_HOST = os.environ.get('EMAIL_HOST', None)
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', None)
+EMAIL_FROM = os.environ.get('EMAIL_FROM', EMAIL_HOST_USER)
+MAIL_FROM_NAME = os.environ.get('EMAIL_FROM_NAME', None)
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', None)
+EMAIL_PORT = os.environ.get('EMAIL_PORT', None)
+EMAIL_USE_SSL = False

@@ -32,3 +32,14 @@ class Status(Enum):
     ACTIVE = "ACTIVE"
     INACTIVE = "INACTIVE"
     DELETED = "DELETED"
+
+
+class VerificationTokenStatus(Enum):
+    UNUSED = "UNUSED"
+    USED = "USED"
+    FACED_OUT = "FACED_OUT"
+
+
+class VerificationType(Enum):
+    INITIAL_VERIFICATION = "INITIAL_VERIFICATION"
+    PASSWORD_RESET = "PASSWORD_RESET"
