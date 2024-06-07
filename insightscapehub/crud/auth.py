@@ -5,7 +5,7 @@ from insightscapehub.schemas.auth import RegisterInput
 from insightscapehub.utils.depends import create_update_delete, get_records
 from insightscapehub.models.user import User
 from insightscapehub.schemas.auth import UserSchema
-import uuid
+from sqlalchemy import or_
 
 from insightscapehub.utils.exceptions import HTTPNotItemFound
 
@@ -33,3 +33,20 @@ def get_one(db: Session, id: str) -> UserSchema:
         return user[0]
     else:
         raise HTTPNotItemFound()
+
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(User).filter(User.username.like(username.strip())).first()
+
+
+def get_user_by_username_or_email(db: Session, username: str, *extra_filters):
+    return (
+        db.query(User)
+        .filter(
+            or_(
+                User.email.ilike(username.strip()),
+                User.username.ilike(username.strip())),
+            *extra_filters
+        )
+        .first()
+    )

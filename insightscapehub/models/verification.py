@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from insightscapehub.utils.db import Base
 from sqlalchemy import UUID, Column, DateTime, String, ForeignKey, Text
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import relationship
 from insightscapehub.dependencies.host import build_qualified_url
 from insightscapehub.utils.enums import VerificationTokenStatus, VerificationType
 from insightscapehub.models import User
@@ -23,8 +23,7 @@ class VerificationToken(Base):
     user_id = Column(UUID, ForeignKey(
         User.id, ondelete='CASCADE'), nullable=False)
     host = Column(Text(), nullable=True)
-    user: Mapped[User] = relationship(
-        'User', back_populates='verification_tokens')
+    user = relationship('User', back_populates='verification_tokens')
 
     @property
     def auth_link(self):

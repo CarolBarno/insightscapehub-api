@@ -10,6 +10,11 @@ load_dotenv()
 DEBUG = os.environ.get("DEBUG", False)
 IS_TESTING = os.environ.get("IS_TESTING", False)
 
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "355206193b79659a5397bb0e6f043711954c00ed5fa52f08d9e615f8ff1d9fcc")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 # DATABASE CONFIGS
 DB_USER = os.environ.get("DB_USER", "postgres")
 DB_NAME = os.environ.get("DB_NAME", "flip_v2")
