@@ -6,6 +6,7 @@ from insightscapehub.utils.enums import Status
 
 class RegisterInput(BaseModel):
     email: EmailStr
+    username: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -1,9 +1,12 @@
 from app.routers import auth_router
-from fastapi import status, Depends
+from typing import Callable
+from fastapi import BackgroundTasks, Depends, status
 from insightscapehub.schemas.auth import (UserSchema, RegisterInput, QueryResp)
 from insightscapehub.crud.auth import (create_user, get_all)
 from insightscapehub.utils.db import get_db, Session
 from insightscapehub.utils.depends import extract_pagination_params
+from insightscapehub.dependencies.verification import create_token_for_user
+from app.tasks import send_reg_email
 
 
 @auth_router.get(
@@ -22,5 +25,13 @@ async def get_users(
     summary='Add a User',
     response_model=UserSchema
 )
-def add_user(data: RegisterInput, db: Session = Depends(get_db)):
-    return create_user(db, data)
+def add_user(
+    data: RegisterInput,
+    tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    create_token: Callable = Depends(create_token_for_user)
+):
+    user = create_user(db, data)
+    token = create_token(user)
+    tasks.add_task(send_reg_email, user, token)
+    return user

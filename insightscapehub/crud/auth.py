@@ -1,4 +1,5 @@
 from typing import List
+import uuid
 from insightscapehub.utils.db import Session
 from insightscapehub.models.user import User
 from insightscapehub.schemas.auth import RegisterInput
@@ -50,3 +51,6 @@ def get_user_by_username_or_email(db: Session, username: str, *extra_filters):
         )
         .first()
     )
+
+def get_user(db: Session, user_id: uuid.UUID):
+    return db.query(User).get(user_id)

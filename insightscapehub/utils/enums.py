@@ -10,6 +10,9 @@ class Enum(str, enum.Enum):
 
 class APITags(Enum):
     user = "Authentication"
+    password = "Password"
+    token = "Access Token"
+    verification = "Account Verification"
 
 
 class AppsEnum(Enum):

@@ -35,3 +35,9 @@ class UserInactive(Exception):
     def __init__(self, message="User inactive"):
         self.message = message
         super().__init__(self.message)
+
+
+class TokenNotFound(Exception):
+    def __init__(self, message="Token not found or is expired"):
+        self.message = message
+        super().__init__(self.message)

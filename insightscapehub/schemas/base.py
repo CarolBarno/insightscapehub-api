@@ -5,7 +5,7 @@ from insightscapehub.utils.validators import PASSWORD_DESCRIPTION, is_valid_pass
 class BasePasswordField(BaseModel):
     password: SecretStr = Field(description=PASSWORD_DESCRIPTION)
 
-    @field_validator('password', allow_reuse=True)
+    @field_validator('password')
     def validate_password(cls, value: SecretStr):
         is_valid_password(password=value.get_secret_value())
 

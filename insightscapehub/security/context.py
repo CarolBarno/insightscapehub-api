@@ -3,5 +3,5 @@ from insightscapehub.utils import settings
 from passlib.context import CryptContext
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=settings.APP_PREFIX + '/token' if settings.APP_PREFIX else '/accounts/toke/')
+    tokenUrl=settings.APP_PREFIX + '/token/' if settings.APP_PREFIX else '/accounts/token/')
 pwd_context = CryptContext(schemes=['bcrypt'])
