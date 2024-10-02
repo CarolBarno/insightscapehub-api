@@ -11,7 +11,7 @@ class App:
 
     def __init__(self, service_name: str, routers: Tuple[APIRouter] = [], APP_HOME=None, description: Optional[str] = None, prefix: Optional[Union[str, None]] = None) -> None:
         self.service_name = service_name
-        self.routers = self._initialize_routers([routers]) if routers else []
+        self.routers = self._initialize_routers(routers if routers else [])
         self.description = (
             description if description else 'InsightScape Microservice for %s' % service_name)
 

@@ -1,0 +1,11 @@
+{% block title %} Account Verification {% endblock%} {% block header %} Account
+Verification {% endblock%} {% block body %}
+<p>Hello,</p>
+<p>Your account. Please click on the link below to verify your account:</p>
+<p><a href="{{ verification_link }">Verify Account</a></p>
+<p>
+  If the above link doesn't work, you can copy and paste the following URL into
+  the user's web browser:
+</p>
+<p>{{ verification_link }}</p>
+{% endblock %}

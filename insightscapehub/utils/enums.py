@@ -10,6 +10,9 @@ class Enum(str, enum.Enum):
 
 class APITags(Enum):
     user = "Authentication"
+    password = "Password"
+    token = "Access Token"
+    verification = "Account Verification"
 
 
 class AppsEnum(Enum):
@@ -25,3 +28,21 @@ def stringify(perm: Union['Enum', str]) -> str:
         return perm
 
     return getattr(perm, 'value', perm)
+
+
+class Status(Enum):
+    PENDING = "PENDING"
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    DELETED = "DELETED"
+
+
+class VerificationTokenStatus(Enum):
+    UNUSED = "UNUSED"
+    USED = "USED"
+    FACED_OUT = "FACED_OUT"
+
+
+class VerificationType(Enum):
+    INITIAL_VERIFICATION = "INITIAL_VERIFICATION"
+    PASSWORD_RESET = "PASSWORD_RESET"
