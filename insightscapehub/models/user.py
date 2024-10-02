@@ -39,3 +39,8 @@ class User(Base):
         from ..security.hashing import verify_password
 
         return verify_password(password, self._password)
+    
+    def generate_session_id(self):
+        from ..utils.helpers import get_session_id_for_user
+
+        return get_session_id_for_user(self)
