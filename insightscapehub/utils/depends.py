@@ -1,5 +1,5 @@
 from insightscapehub.utils.db import Session
-from sqlalchemy import select, func, and_, desc, asc
+from sqlalchemy import select, func, and_, desc, asc, not_
 from fastapi import HTTPException, status
 from fastapi import Query
 import math
@@ -58,7 +58,9 @@ def extract_pagination_params(
         limit: int = Query(default=10, title='Page limit',
                            description='Number of items per page', enum=[10, 20])
 ) -> dict:
-
+    """
+    Extract pagination query parameters
+    """
     pagination_params = {}
 
     if page is not None:
@@ -70,22 +72,53 @@ def extract_pagination_params(
     return pagination_params
 
 
-def get_records(model, db: Session, query: dict = {}, condition: dict = {}, schema: any = None):
+def get_records(
+    model,
+    db: Session,
+    query: dict = {},
+    condition: dict = {},
+    schema: any = None
+):
     """
-    Retrieve records
-    Arguments:
-    model
-    db (Session): database session object
-    query (optional): dictionay containing query parameters, example, 'page', 'limit', 'order_by'
-    condition (optional)
-    schema (optional)
-    Returns: dict - containing retrieved records
-    Raises: Exception - any exception that occur during database query execution
+    Retrieve records from the database while supporting joins, conditions on joined models, and ordering.
 
-    Example:
-    models = [{'model': Model, 'conditions': Model.id == 'id'}]
-    query_params = {'page': 1, 'limit': 10, 'order_by': [('column_name', 'ASC')]}
-    result = get_records(models, db_session, query=query_params, schema=my_schema)
+    Args:
+        model (list of dict) or the model: A list of dictionaries where each dictionary contains information about
+            the model to join and any conditions for that join. Each dictionary should have two keys:
+            - 'model': The SQLAlchemy model class to join.
+            - 'conditions' (optional): Conditions to apply to the join.
+
+        db (Session): The SQLAlchemy database session object.
+
+        query (dict, optional): A dictionary containing query parameters, such as 'page', 'limit', and 'order_by',
+            for pagination and ordering. Defaults to an empty dictionary.
+
+        condition (dict, optional): Additional conditions to filter the results. Defaults to an empty dictionary.
+
+        schema (any, optional): An optional schema or data validation function to apply to the retrieved
+            records. Defaults to None.
+
+    Returns:
+        dict: A dictionary containing the retrieved records, pagination information, and total counts.
+
+    Raises:
+        Exception: Any exception that occurs during database query execution.
+
+    Example Usage:
+        models_to_join = [
+            {
+                'model': Model1,
+            },
+            {
+                'model': Model2,
+                 'conditions': {
+                    "on": Model2.model1_id == Model1.id,
+                    "where": Model2.model2_id == "id"
+                },
+            }
+        ]
+        query_params = {'page': 1, 'limit': 10, 'order_by': [('column_name1', 'ASC'), ('column_name2', 'DESC')]}
+        result = get_records(models_to_join, db_session, query=query_params, schema=my_schema)
     """
 
     try:
@@ -106,10 +139,13 @@ def get_records(model, db: Session, query: dict = {}, condition: dict = {}, sche
 
             stmt = select(models[0]['model']).limit(limit).offset(offset)
 
-            for join in models[1:]:
-                model = join['model']
-                conditions = join.get('conditions', None)
-                stmt = stmt.join(model, conditions)
+            if isinstance(model, list):
+                for join in models[1:]:
+                    model = join['model']
+                    on_clause = join.get['conditions'].get('on', None)
+                    where_clause = join['conditions'].get('where', None)
+                    stmt = stmt.join(
+                        model, onclause=on_clause).where(where_clause)
 
             if condition:
                 filter = []
@@ -120,7 +156,18 @@ def get_records(model, db: Session, query: dict = {}, condition: dict = {}, sche
                         filter.append(func.json_extract_path_text(
                             json_column, *sub_key.split('.')) == value)
                     else:
-                        if isinstance(value, list):
+                        if isinstance(value, dict):
+                            operator, condition_value = list(value.items())[0]
+                            if operator == '!=':
+                                filter.append(
+                                    not_(
+                                        getattr(model[0]['model'],
+                                                key) == condition_value
+                                    )
+                                )
+                            else:
+                                continue
+                        elif isinstance(value, list):
                             filter.append(
                                 getattr(models[0]['model'], key).in_(value))
                         else:
@@ -132,6 +179,14 @@ def get_records(model, db: Session, query: dict = {}, condition: dict = {}, sche
             count_stmt = select(func.count().label(
                 'total')).select_from(models[0]['model'])
 
+            if isinstance(model, list):
+                for join in models[1:]:
+                    model = join['model']
+                    on_clause = join.get['conditions'].get('on', None)
+                    where_clause = join['conditions'].get('where', None)
+                    count_stmt = count_stmt.join(
+                        model, onclause=on_clause).where(where_clause)
+
             if condition:
                 filter_count = []
                 for key, value in condition.items():
@@ -141,7 +196,18 @@ def get_records(model, db: Session, query: dict = {}, condition: dict = {}, sche
                         filter_count.append(func.json_extract_path_text(
                             json_column, *sub_key.split('.')) == value)
                     else:
-                        if isinstance(value, list):
+                        if isinstance(value, dict):
+                            operator, condition_value = list(value.items())[0]
+                            if operator == '!=':
+                                filter_count.append(
+                                    not_(
+                                        getattr(models[0]['model'],
+                                                key) == condition_value
+                                    )
+                                )
+                            else:
+                                continue
+                        elif isinstance(value, list):
                             filter_count.append(
                                 getattr(models[0]['model'], key).in_(value))
                         else:
@@ -189,7 +255,18 @@ def get_records(model, db: Session, query: dict = {}, condition: dict = {}, sche
             if condition:
                 filter = []
                 for key, value in condition.items():
-                    if isinstance(value, list):
+                    if isinstance(value, dict):
+                        operator, condition_value = list(value.items())[0]
+                        if operator == "!=":
+                            filter.append(
+                                not_(
+                                    getattr(models[0]["model"], key)
+                                    == condition_value
+                                )
+                            )
+                        else:
+                            continue
+                    elif isinstance(value, list):
                         filter.append(
                             getattr(models[0]['model'], key).in_(value))
                     else:
