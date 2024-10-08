@@ -46,3 +46,10 @@ MAIL_FROM_NAME = os.environ.get('EMAIL_FROM_NAME', None)
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', None)
 EMAIL_PORT = os.environ.get('EMAIL_PORT', None)
 EMAIL_USE_SSL = False
+
+
+# FILE EXTENSIONS
+IMAGE_EXTENSIONS = os.environ.get("IMAGE_EXTENSIONS", 'jpg,jpeg,png,gif,bmp,tiff,tif,webp,svg,heif,heic,raw,psd')
+VIDEO_EXTENSIONS = os.environ.get("VIDEO_EXTENSIONS", 'mp4,avi,mkv,mov,wmv,flv,mpeg,mpg,webm,3gp,m4v,ts')
+AUDIO_EXTENSIONS = os.environ.get("AUDIO_EXTENSIONS", 'mp3,wav,ogg,flac,aac,m4a,wma,alac,aiff')
+DOCUMENT_EXTENSIONS = os.environ.get("DOCUMENT_EXTENSIONS", 'pdf,doc,docx,xls,xlsx,ppt,pptx,txt,rtf,odt,ods,odp,epub')

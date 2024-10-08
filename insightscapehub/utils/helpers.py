@@ -84,3 +84,16 @@ def create_refresh_token(user: User, session_id: str):
     encoded_jwt = jwt.encode(
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
+
+
+def get_extensions_from_env(env_variable_name):
+    """
+    Retrieves a set of file extensions from the environment variable.
+
+    Args:
+    env_variable_name (str): The name of the environment variable to fetch.
+
+    Returns:
+    set: A set of extensions with a leading '.' for each.
+    """
+    return {f'.{ext.strip()}' for ext in env_variable_name.split(',') if ext.strip()}
