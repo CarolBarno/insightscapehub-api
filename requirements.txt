@@ -17,5 +17,6 @@ pydantic_settings==2.2.1
 ecdsa==0.19.0
 pyasn1==0.6.0 
 python-jose==3.3.0 
+redis==5.1.1
 rsa==4.9 
 six==1.16.0
