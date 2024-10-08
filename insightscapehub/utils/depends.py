@@ -3,6 +3,7 @@ from sqlalchemy import select, func, and_, desc, asc, not_
 from fastapi import HTTPException, status
 from fastapi import Query
 import math
+from .cache import cache
 
 
 def create_update_delete(model, db: Session, data: any, method='create', query=None, schema=None):
@@ -46,6 +47,8 @@ def create_update_delete(model, db: Session, data: any, method='create', query=N
             record.status = 'DELETED'
             db.commit()
             db.refresh(record)
+
+        cache.clear(model)
 
         return response
     except Exception as e:

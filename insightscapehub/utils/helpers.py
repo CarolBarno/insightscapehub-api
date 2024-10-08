@@ -11,6 +11,10 @@ from insightscapehub.utils.exceptions import (
     UserInactive, UserNotFound, UserNotVerified, UserUnauthenticated)
 from insightscapehub.security.hashing import verify_password
 import base64
+from starlette.datastructures import UploadFile
+from urllib.parse import urlparse
+from io import BytesIO
+import requests
 
 
 def decode_token(token, force_access=True, force_refresh=False, secret_key: str = settings.SECRET_KEY, algorithms=[settings.ALGORITHM]):
@@ -97,3 +101,77 @@ def get_extensions_from_env(env_variable_name):
     set: A set of extensions with a leading '.' for each.
     """
     return {f'.{ext.strip()}' for ext in env_variable_name.split(',') if ext.strip()}
+
+
+async def process_form_data(form_data):
+    """
+    Processes form data, separating regular form fields from file uploads.
+
+    Parameters:
+    - form_data (dict): A dictionary containing form data, possibly including file uploads.
+
+    Returns:
+    - prepared_form_data (dict): A dictionary containing regular form fields.
+    - files_data (dict): A dictionary containing file upload information, with keys as field names and values as tuples
+                        containing filename, file content, and content type.
+
+    Example Usage:
+    ```python
+    form_data = {'name': 'John Doe', 'avatar': <UploadFile>, 'resume': <UploadFile>}
+    prepared_data, files_info = await process_form_data(form_data)
+    ```
+    """
+    prepared_form_data = {}
+    files_data = {}
+
+    for key, value in form_data.items():
+        if isinstance(value, UploadFile):
+            file_content = await value.read()
+            if len(file_content) == 0:
+                value.file.seek(0)  # Reset file pointer and try again
+                file_content = await value.read()
+            files_data[key] = (value.filename, file_content,
+                               value.content_type)
+        elif isinstance(value, str) and is_valid_url(value) and is_url_file(value):
+            _file = url_to_uploadfile(value)
+            files_data[key] = (_file.filename, await _file.read(), _file.content_type)
+        else:
+            prepared_form_data[key] = value
+
+    return prepared_form_data, files_data
+
+
+def is_url_file(url):
+    try:
+        response = requests.get(url, stream=True)
+        if response.status_code == 200:
+            return True
+        else:
+            return False
+    except requests.exceptions.RequestException:
+        return False
+
+
+def is_valid_url(url):
+    try:
+        result = urlparse(url)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
+
+
+def url_to_uploadfile(image_url):
+    try:
+        response = requests.get(image_url)
+        if response.status_code == 200:
+            return UploadFile(
+                filename=image_url.split(
+                    "/")[-1], file=BytesIO(response.content)
+            )
+        else:
+            print("Failed to fetch image from URL. Status code:",
+                  response.status_code)
+            return None
+    except requests.exceptions.RequestException as e:
+        print("Error fetching image from URL:", e)
+        return None
